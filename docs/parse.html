@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>parse.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id="background"></div>
+<div id='container'>
+  <div class='section'>
+    <div class='docs'><h1>parse.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <h3><span id="webhook-api" href="webhook-api"> Webhook API </span></h3>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      <p><strong> Sendgrid's Inbox Parse Webhook API </strong></p>
+<p>The Parse API will <em>POST</em> the parsed email to a <em>URL</em> specified in the
+Sendgrid settings. If <em>POST</em> is unsuccesful,
+SendGrid automatically queues and
+retries any POSTs that respond with a <code>4XX</code> or <code>5XX</code> status.
+To prevent redelivery or queueing of the mail, respond with <code>2XX</code>.
+Messages that cannot be delivered after <strong>3 days</strong> will be dropped.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      <p><strong> POST Parameters </strong></p>
+<p><strong>headers</strong>: <em>raw</em> headers of the email</p>
+<p><strong>text</strong>: text body of the email.
+If not set, the email did not have a text body.</p>
+<p><strong>html</strong>: HTML body of the email.
+If not set, the email did not have a HTML body.</p>
+<p><strong>from</strong>: email sender taken from message headers.</p>
+<p><strong>to</strong>: email recipient field taken from message headers.</p>
+<p><strong>cc</strong>: email cc field taken from message headers.</p>
+<p><strong>subject</strong>: email subject.</p>
+<p><strong>dkim</strong>: a <em>JSON</em> string containing the verification results of any
+dkim and domain keys signatures in the message.</p>
+<p><strong>SPF</strong>: results of Sender Policy Framework verification of the
+message sender and receiving IP address.</p>
+<p><strong>envelope</strong>: <em>JSON</em> string containing the <em>SMTP</em> envelope.
+Has two variables:
+  <strong>to</strong>: a single-element array containing the receiving address;
+  <strong>from</strong>: return path of the message.</p>
+<p><strong>charsets</strong>: <em>JSON</em> string for character set of fields extracted.</p>
+<p><strong>spam_score</strong>: Spam Assassin's rating for whether this is <em>spam</em>.</p>
+<p><strong>spam_report</strong>: Spam Assassin's spam report.</p>
+<p><strong>attachments</strong>: Number of attachments included in email.</p>
+<p><strong>attachment-info</strong>: <em>JSON</em> string containing <code>attachmentX</code> keys
+with another <em>JSON</em> string as the value.
+Contains the keys <em>filename</em>, <em>type</em> (media type)</p>
+<p><strong>attachmentX</strong>: file upload names, where <strong><code>N</code></strong> is the total number of
+attachments in the email. Attachments are provided as file uploads.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      <p>Parses mails sent via POST by SendGrid.</p>
+<p><strong>Args</strong>: <code>request: dict</code> containing POST request</p>
+<p><strong>Returns</strong>: <code>dict</code> of items.</p>
+<p><strong>Raises</strong>: <code>SendGridParseError</code> or its child classes.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">filedict</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      <p>The <code>mail</code> dictionary will hold all required fields.
+The <code>errors</code> dictionary will hold all errors.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">mail</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">errors</span> <span class="o">=</span> <span class="p">{}</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">_parse_nonempty_field</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">dictionary</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">errors</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> cannot be empty.&quot;</span> <span class="o">%</span> <span class="n">key</span>
+        <span class="k">return</span> <span class="n">value</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      <p>TODO: validate email addresses</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <p>get the address the mail was sent to</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">mail</span><span class="p">[</span><span class="s">&#39;to&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_parse_nonempty_field</span><span class="p">(</span><span class="s">&#39;to&#39;</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      <p>get the address the mail was sent from</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">mail</span><span class="p">[</span><span class="s">&#39;from&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_parse_nonempty_field</span><span class="p">(</span><span class="s">&#39;from&#39;</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      <p>get mail subject</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">mail</span><span class="p">[</span><span class="s">&#39;subject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_parse_nonempty_field</span><span class="p">(</span><span class="s">&#39;subject&#39;</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      <p>CC and BCC fields.
+It doesn't matter if these fields are empty,
+the email would still be valid.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">mail</span><span class="p">[</span><span class="s">&#39;cc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;cc&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="n">mail</span><span class="p">[</span><span class="s">&#39;bcc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;bcc&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-13'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-13'>#</a>
+      </div>
+      <p>The body contents of the email can be in either text or html format.
+The body can also be empty.
+The body_type key offers hints on which values are available.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">mail</span><span class="p">[</span><span class="s">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;text&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="n">mail</span><span class="p">[</span><span class="s">&#39;html&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;html&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-14'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-14'>#</a>
+      </div>
+      <p><code>if mail['html'] is None:
+        if mail['text'] is None:
+            mail['body_type'] = None
+        else:
+            mail['body_type'] = 'text'
+    else:
+        mail['body_type'] = 'html'</code></p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-15'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-15'>#</a>
+      </div>
+      <p>Retrieve the email RAW headers.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">mail</span><span class="p">[</span><span class="s">&#39;headers&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_parse_nonempty_field</span><span class="p">(</span><span class="s">&#39;headers&#39;</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-16'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-16'>#</a>
+      </div>
+      <p>DKIM is a JSON string verification message</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">mail</span><span class="p">[</span><span class="s">&#39;dkim&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;dkim&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-17'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-17'>#</a>
+      </div>
+      <p>SPF verification message</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">mail</span><span class="p">[</span><span class="s">&#39;SPF&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;SPF&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-18'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-18'>#</a>
+      </div>
+      <p>TODO: parse <em>to</em> and <em>from</em></p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-19'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-19'>#</a>
+      </div>
+      <p>SMTP envelope containing JSON string</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">mail</span><span class="p">[</span><span class="s">&#39;envelope&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;envelope&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-20'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-20'>#</a>
+      </div>
+      <p>TODO: encode fields using parsed charset</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-21'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-21'>#</a>
+      </div>
+      <p>charset of the mail</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">mail</span><span class="p">[</span><span class="s">&#39;charsets&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;charsets&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-22'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-22'>#</a>
+      </div>
+      <p>Spam score and report</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">mail</span><span class="p">[</span><span class="s">&#39;spam_score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;spam_score&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="n">mail</span><span class="p">[</span><span class="s">&#39;spam_report&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;spam_report&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-23'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-23'>#</a>
+      </div>
+      <p>TODO: save attachments to temporary location</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-24'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-24'>#</a>
+      </div>
+      <p>Mail attachments is a list of attachments.
+To get count, use <code>len()</code>.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">mail</span><span class="p">[</span><span class="s">&#39;attachments&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">no_attachments</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;attachments&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">no_attachments</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">filedict</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">errors</span><span class="p">[</span><span class="s">&#39;attachments&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;file dictionary is empty / None.&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">no</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">no_attachments</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">attachment</span> <span class="o">=</span> <span class="n">filedict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;attachment</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">no</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">attachment</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">errors</span><span class="p">[</span><span class="s">&#39;attachment</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">no</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;attachment</span><span class="si">%d</span><span class="s"> is empty.&quot;</span> <span class="o">%</span> <span class="n">no</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">mail</span><span class="p">[</span><span class="s">&#39;attachments&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attachment</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-25'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-25'>#</a>
+      </div>
+      <p>Attach errors to the return object.
+Uses property of empty dictionaries where -</p>
+<ul>
+<li><code>d = {}</code></li>
+<li><code>bool(d) is False</code></li>
+<li><code>not d is True</code></li>
+<li><code>len(d) == 0 is True</code></li>
+</ul>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">if</span> <span class="n">errors</span><span class="p">:</span>
+        <span class="n">mail</span><span class="p">[</span><span class="s">&#39;errors&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">errors</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">mail</span><span class="p">[</span><span class="s">&#39;errors&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">return</span> <span class="n">mail</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>
