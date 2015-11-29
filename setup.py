@@ -9,7 +9,7 @@ def readme():
         return f.read()
 setup(
     name='sendgrid_parse',
-    version='0.2',
+    version='0.2.1',
     description="Access SendGrid's Inbound Parse emails into a dictionary",
     long_description=readme(),
     classifiers=[
