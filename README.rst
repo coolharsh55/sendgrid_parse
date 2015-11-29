@@ -1,62 +1,108 @@
 SendGrid Inbound Parse Emails
---------------------------
+-----------------------------
 
 Parses SendGrid's Inbound Parse Emails into a dictionary of fields from POST parameters.
 
-The Parse API will _POST_ the parsed email to a _URL_ specified in the
-Sendgrid settings. If _POST_ is unsuccesful,
+The Parse API will *POST* the parsed email to a *URL* specified in the
+Sendgrid settings. If *POST* is unsuccesful,
 SendGrid automatically queues and
 retries any POSTs that respond with a `4XX` or `5XX` status.
 To prevent redelivery or queueing of the mail, respond with `2XX`.
 Messages that cannot be delivered after **3 days** will be dropped.
 
-** POST Parameters **
+See `SendGrid documentation
+<https://sendgrid.com/docs/API_Reference/Webhooks/parse.html>`_
+for more details.
 
-**headers**: _raw_ headers of the email
 
-**text**: text body of the email.
-If not set, the email did not have a text body.
+POST Parameters
+---------------
 
-**html**: HTML body of the email.
-If not set, the email did not have a HTML body.
+The POST parameters are available from the returned dictionary with the following keys:
 
-**from**: email sender taken from message headers.
+* **headers**: *raw* headers of the email
 
-**to**: email recipient field taken from message headers.
+* **text**: text body of the email.
+  If not set, the email did not have a text body.
 
-**cc**: email cc field taken from message headers.
+* **html**: HTML body of the email.
+  If not set, the email did not have a HTML body.
 
-**subject**: email subject.
+* **from**: email sender taken from message headers.
 
-**dkim**: a _JSON_ string containing the verification results of any
-dkim and domain keys signatures in the message.
+* **to**: email recipient field taken from message headers.
 
-**SPF**: results of Sender Policy Framework verification of the
-message sender and receiving IP address.
+* **cc**: email cc field taken from message headers.
 
-**envelope**: _JSON_ string containing the _SMTP_ envelope.
-Has two variables:
-  **to**: a single-element array containing the receiving address;
-  **from**: return path of the message.
+* **subject**: email subject.
 
-**charsets**: _JSON_ string for character set of fields extracted.
+* **dkim**: a *JSON* string containing the verification results of any
+  dkim and domain keys signatures in the message.
 
-**spam_score**: Spam Assassin's rating for whether this is _spam_.
+* **SPF**: results of Sender Policy Framework verification of the
+  message sender and receiving IP address.
 
-**spam_report**: Spam Assassin's spam report.
+* **envelope**: *JSON* string containing the *SMTP* envelope.
+  Has two variables:
 
-**attachments**: Number of attachments included in email.
+  1. **to**: a single-element array containing the receiving address;
+  2. **from**: return path of the message.
 
-**attachment-info**: _JSON_ string containing `attachmentX` keys
-with another _JSON_ string as the value.
-Contains the keys _filename_, _type_ (media type)
+* **charsets**: *JSON* string for character set of fields extracted.
 
-**attachmentX**: file upload names, where **`N`** is the total number of
-attachments in the email. Attachments are provided as file uploads.
+* **spam_score**: Spam Assassin's rating for whether this is *spam*.
 
-To use, do (generic example):
+* **spam_report**: Spam Assassin's spam report.
 
-    > from sendgrid_parse import parse
-    > mail = parse(request.POST, request.files)
+* **attachments**: List containing file objects ordered by attachment number in email.
+  If available, file object/stream will be appended to the list.
+  If no file objects/streams are available, the attachment dictionary keys will be appended.
+  These keys can be then used to access the attachments.
+  Keys are the string ``attachment`` suffixed by n
+  where n is in 1...N with N being the total number of attachments
 
-This is a generic example, in some frameworks, the POST data could be in `form` variable (in flask) whereas in others, it could be in the `POST` variable (in django). Also, the attachments sent via POST are stored in another dictionary, which can be `request.files` or `request.FILES`. If no file dictionary is supplied, parse will instead return a list of keys for accessing attachments in the file dictionary.
+* **attachment-info**: *JSON* string containing `attachmentX` keys
+  with another *JSON* string as the value.
+  Contains the keys *filename*, *type* (media type)
+
+* **errors**: All errors are silently ignored and are returned as strings in a dictionary
+  whose keys are the other keys. So, for e.g. an error about parsing *subject* is available as
+  ``mail['errors']['subject']``
+
+
+Helper utilities
+----------------
+
+The ``sendgrid_parse.helpers`` contains utilities for **flask** and **django**
+that use the correct request variables to access the POST data and attachments.
+These are wrappers around the ``parse`` method
+and do not contain any framework specific except for naming and access conventions.
+
+
+Usage
+-----
+
+The package is available under :code:`sendgrid_parse`.
+
+.. code:: python
+
+   # install
+   pip install sendgrid_parse
+
+   # plain python (args: POST dictionary, files dictionary)
+   from sendgrid_parse import parse
+   mail = parse(post_dict, file_dict)
+
+   # for flask
+   from sendgrid_parse.helpers.flask import parse
+   # for django
+   from sendgrid_parse.helpers.django import parse
+
+   mail = parse(request)
+
+
+Github Repository
+-----------------
+
+`sendgrid_parse
+<https://github.com/coolharsh55/pnl2lnl>`_

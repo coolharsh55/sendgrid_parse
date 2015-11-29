@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>SendGrid - Parse</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+
+        <link rel="stylesheet" type="text/css" href="pycco.css">
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+        <div class='container'>
+        <div class='docs'>
+        <!-- Add your site or application content here -->
+        <h1 id="sendgrid-inbound-parse-emails">SendGrid Inbound Parse Emails</h1>
+        <p>Parses SendGrid’s Inbound Parse Emails into a dictionary of fields from POST parameters.</p>
+        <p>The Parse API will <em>POST</em> the parsed email to a <em>URL</em> specified in the Sendgrid settings. If <em>POST</em> is unsuccesful, SendGrid automatically queues and retries any POSTs that respond with a 4XX or 5XX status. To prevent redelivery or queueing of the mail, respond with 2XX. Messages that cannot be delivered after <strong>3 days</strong> will be dropped.</p>
+        <p>See <a href="https://sendgrid.com/docs/API_Reference/Webhooks/parse.html">SendGrid documentation</a> for more details.</p>
+
+        <h2 id="post-parameters">POST Parameters</h2>
+        <p>The POST parameters are available from the returned dictionary with the following keys:</p>
+        <ul>
+        <li><strong>headers</strong>: <em>raw</em> headers of the email</li>
+        <li><strong>text</strong>: text body of the email. If not set, the email did not have a text body.</li>
+        <li><strong>html</strong>: HTML body of the email. If not set, the email did not have a HTML body.</li>
+        <li><strong>from</strong>: email sender taken from message headers.</li>
+        <li><strong>to</strong>: email recipient field taken from message headers.</li>
+        <li><strong>cc</strong>: email cc field taken from message headers.</li>
+        <li><strong>subject</strong>: email subject.</li>
+        <li><strong>dkim</strong>: a <em>JSON</em> string containing the verification results of any dkim and domain keys signatures in the message.</li>
+        <li><strong>SPF</strong>: results of Sender Policy Framework verification of the message sender and receiving IP address.</li>
+        <li><strong>envelope</strong>: <em>JSON</em> string containing the <em>SMTP</em> envelope. Has two variables:
+        <ol style="list-style-type: decimal">
+        <li><strong>to</strong>: a single-element array containing the receiving address;</li>
+        <li><strong>from</strong>: return path of the message.</li>
+        </ol></li>
+        <li><strong>charsets</strong>: <em>JSON</em> string for character set of fields extracted.</li>
+        <li><strong>spam_score</strong>: Spam Assassin’s rating for whether this is <em>spam</em>.</li>
+        <li><strong>spam_report</strong>: Spam Assassin’s spam report.</li>
+        <li><strong>attachments</strong>: List containing file objects ordered by attachment number in email. If available, file object/stream will be appended to the list. If no file objects/streams are available, the attachment dictionary keys will be appended. These keys can be then used to access the attachments. Keys are the string <code>attachment</code> suffixed by n where n is in 1…N with N being the total number of attachments</li>
+        <li><strong>attachment-info</strong>: <em>JSON</em> string containing attachmentX keys with another <em>JSON</em> string as the value. Contains the keys <em>filename</em>, <em>type</em> (media type)</li>
+        <li><strong>errors</strong>: All errors are silently ignored and are returned as strings in a dictionary whose keys are the other keys. So, for e.g. an error about parsing <em>subject</em> is available as <code>mail['errors']['subject']</code></li>
+        </ul>
+        </div>
+
+        <div class='code'>
+
+        <h2 id="helper-utilities">Helper utilities</h2>
+        <p>The <code>sendgrid_parse.helpers</code> contains utilities for <strong>flask</strong> and <strong>django</strong> that use the correct request variables to access the POST data and attachments. These are wrappers around the <code>parse</code> method and do not contain any framework specific except for naming and access conventions.</p>
+
+        <h2 id="usage">Usage</h2>
+        <p>The package is available under <code class="sourceCode">sendgrid_parse</code>.</p>
+        <p>To install, use: <code>pip install sendgrid_parse</code> </p>
+<div class="highlight"><pre># plain python (args: POST dictionary, files dictionary)
+<span class="kn">from</span> <span class="nn">sendgrid_parse</span> <span class="kn">import</span> <span class="n">parse</span>
+<span class="n">mail</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">post_dict</span><span class="p">,</span> <span class="n">file_dict</span><span class="p">)</span></pre></div>
+<br><br>
+<div class="highlight"><pre>
+# for frameworks:
+# flask
+<span class="kn">from</span> <span class="nn">sendgrid_parse.helpers.flask</span> <span class="kn">import</span> <span class="n">parse</span>
+# django
+<span class="kn">from</span> <span class="nn">sendgrid_parse.helpers.django</span> <span class="kn">import</span> <span class="n">parse</span>
+
+# use:
+<span class="n">mail</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+      </pre></div>
+
+<div>
+<h2>Code Documentation</h2>
+<ul>
+<li><a href='parse.html'><bold>parser.py</bold></a> - base parser</li>
+<li><a href='helpers/flask.html'><bold>flask.py</bold></a> - flask wrapper</li>
+<li><a href='helpers/django.html'><bold>django.py</bold></a> - django wrapper</li>
+</ul>
+</div>
+
+<div>
+<h2><a href='https://github.com/coolharsh55/sendgrid_parse'>Github code</a></h2>
+Contains the hosted code repository. Issues / Bugs / Requests to be kindly taken up there.
+</div>
+
+    </div></div>
+    </body>
+</html>

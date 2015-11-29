@@ -3,58 +3,82 @@
 
 # === Webhook API ===
 
-# ** Sendgrid's Inbox Parse Webhook API **
-#
-# The Parse API will _POST_ the parsed email to a _URL_ specified in the
-# Sendgrid settings. If _POST_ is unsuccesful,
-# SendGrid automatically queues and
-# retries any POSTs that respond with a `4XX` or `5XX` status.
-# To prevent redelivery or queueing of the mail, respond with `2XX`.
-# Messages that cannot be delivered after **3 days** will be dropped.
+# SendGrid Inbound Parse Emails
+# =============================
 
-# ** POST Parameters **
-#
-# **headers**: _raw_ headers of the email
-#
-# **text**: text body of the email.
-# If not set, the email did not have a text body.
-#
-# **html**: HTML body of the email.
-# If not set, the email did not have a HTML body.
-#
-# **from**: email sender taken from message headers.
-#
-# **to**: email recipient field taken from message headers.
-#
-# **cc**: email cc field taken from message headers.
-#
-# **subject**: email subject.
-#
-# **dkim**: a _JSON_ string containing the verification results of any
-# dkim and domain keys signatures in the message.
-#
-# **SPF**: results of Sender Policy Framework verification of the
-# message sender and receiving IP address.
-#
-# **envelope**: _JSON_ string containing the _SMTP_ envelope.
-# Has two variables:
-#   **to**: a single-element array containing the receiving address;
-#   **from**: return path of the message.
-#
-# **charsets**: _JSON_ string for character set of fields extracted.
-#
-# **spam_score**: Spam Assassin's rating for whether this is _spam_.
-#
-# **spam_report**: Spam Assassin's spam report.
-#
-# **attachments**: Number of attachments included in email.
-#
-# **attachment-info**: _JSON_ string containing `attachmentX` keys
-# with another _JSON_ string as the value.
-# Contains the keys _filename_, _type_ (media type)
-#
-# **attachmentX**: file upload names, where **`N`** is the total number of
-# attachments in the email. Attachments are provided as file uploads.
+# Parses SendGrid’s Inbound Parse Emails into
+# a dictionary of fields from POST parameters.
+
+# The Parse API will *POST* the parsed email to
+# a *URL* specified in the Sendgrid settings.
+# If *POST* is unsuccesful,
+# SendGrid automatically queues and retries any
+# POSTs that respond with a 4XX or 5XX status.
+# To prevent redelivery or queueing of the mail,
+# respond with 2XX. Messages that cannot be
+# delivered after **3 days** will be dropped.
+
+# See [SendGrid documentation] for more details.
+
+# POST Parameters
+# ===============
+
+# The POST parameters are available from the
+# returned dictionary with the following keys:
+
+# -   **headers**: *raw* headers of the email
+# -   **text**: text body of the email.
+#      If not set, the email did not have a text body.
+# -   **html**: HTML body of the email.
+#      If not set, the email did not have a HTML body.
+# -   **from**: email sender taken from message headers.
+# -   **to**: email recipient field taken from message headers.
+# -   **cc**: email cc field taken from message headers.
+# -   **subject**: email subject.
+# -   **dkim**: a *JSON* string containing the verification results of any
+#     dkim and domain keys signatures in the message.
+# -   **SPF**: results of Sender Policy Framework verification of the message
+#     sender and receiving IP address.
+# -   **envelope**: *JSON* string containing the *SMTP* envelope.
+#     Has two variables:
+#     1.  **to**: a single-element array containing the receiving address;
+#     2.  **from**: return path of the message.
+# -   **charsets**: *JSON* string for character set of fields extracted.
+# -   **spam\_score**: Spam Assassin’s rating for whether this is *spam*.
+# -   **spam\_report**: Spam Assassin’s spam report.
+# -   **attachments**: Number of attachments included in email.
+# -   **attachment-info**: *JSON* string containing attachmentX keys
+#     with another *JSON* string as the value.
+#     Contains the keys *filename*, *type* (media type)
+# -   **attachmentX**: file upload names, where **N** is the
+#     total number of attachments in the email.
+#     Attachments are provided as file uploads.
+# -   **errors**: All errors are silently ignored and are returned as
+#     strings in a dictionary whose keys are the other keys.
+#     So, for e.g. an error about parsing *subject* is
+#     available as `mail['errors']['subject']`
+
+# Usage
+# =====
+
+# The package is available under `sendgrid_parse`.
+
+# ``` sourceCode
+# from sendgrid_parse import parse
+# mail = parse(request.POST, request.files)
+# ```
+
+# This is a generic example, in some frameworks, the POST data could be
+# in `form` variable (in *flask*) whereas in others,
+# it could be in the `POST` variable (in *django*).
+# Also, the attachments sent via POST are stored in another dictionary,
+# which can be `request.files` or `request.FILES`.
+# If no file dictionary is supplied,
+# parse will instead return a list of keys for
+# accessing attachments in the file dictionary.
+
+#   [SendGrid documentation]:
+#   https://sendgrid.com/docs/API_Reference/Webhooks/parse.html
 
 
 def parse(request, filedict=None):
@@ -67,6 +91,9 @@ def parse(request, filedict=None):
 
     **Raises**: `SendGridParseError` or its child classes.
     """
+
+    if request is None:
+        return None
 
     # The `mail` dictionary will hold all required fields.
     # The `errors` dictionary will hold all errors.
@@ -140,10 +167,20 @@ def parse(request, filedict=None):
     # Mail attachments is a list of attachments.
     # To get count, use `len()`.
     mail['attachments'] = []
+    mail['attachment-info'] = request.get('attachment-request', None)
     no_attachments = int(request.get('attachments', 0))
     if no_attachments > 0:
+        # If attachments are not available,
+        # return **keys** for attachments instead.
+        # The *keys* are the string `attachment`
+        # suffixed by a number from `1...n`.
         if filedict is None:
             errors['attachments'] = "file dictionary is empty / None."
+            for no in range(1, no_attachments + 1):
+                attachment = 'attachment%d' % no
+                mail['attachments'].append(attachment)
+        # If the attachment is available,
+        # append the file objects instead.
         else:
             for no in range(1, no_attachments + 1):
                 attachment = filedict.get('attachment%d' % no, None)

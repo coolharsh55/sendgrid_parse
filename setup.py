@@ -9,8 +9,8 @@ def readme():
         return f.read()
 setup(
     name='sendgrid_parse',
-    version='0.1',
-    description="Parse Inbound Email from Sendgrid into a dictionary",
+    version='0.2',
+    description="Access SendGrid's Inbound Parse emails into a dictionary",
     long_description=readme(),
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -18,7 +18,7 @@ setup(
         'Programming Language :: Python',
         'Topic :: Communications :: Email',
     ],
-    keywords="sendgrid inbound parse email",
+    keywords="sendgrid inbound parse email flask django",
     url='https://github.com/coolharsh55/sendgrid_parse',
     author='coolharsh55',
     author_email="me@harshp.com",
